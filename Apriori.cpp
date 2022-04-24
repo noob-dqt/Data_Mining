@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 const int N = 1e5+5;
-//本数据集中最大数字是16469
 //使用vector存储单个项集
 int r,mx; //总共有r行数据，数据集中最大的数字是mx
 int cnt[N];     //统计一项集
@@ -101,7 +100,7 @@ int main()
         }
     }
     vector<int>tp;          //产生临时项集
-    while (L.size()>1)      //等于1时不会再产生新的频繁项集
+    while (L.size()>=1)      //等于1时不会再产生新的频繁项集
     {
         C.clear();          //清空Ci-1的项集
         for(auto tp:L) res.push_back(tp);  //L中结果放入结果集
@@ -120,12 +119,12 @@ int main()
             }
         }
         //Ci+1中筛选出Li+1
-        //扫描数据库，并统计每一项集的置信度
+        //扫描数据库，并统计每一项集的支持度
         L.clear();      //清空L，空间重复利用，将新产生的频繁项集存入L
         for(auto tp:C){
             if(iscount(tp)) L.insert(tp);
         }
-        if(L.size()==1) res.push_back(*L.begin());     //特殊处理最后一项
+        if(L.size()==1) {res.push_back(*L.begin());break;}     //特殊处理最后一项
     }
     cout<<"total: "<<res.size()<<" items\n";
     for(auto tp:res){
