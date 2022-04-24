@@ -54,6 +54,18 @@ public:
         flag=1;
         Header_Table.clear();
     }
+    void predel(fpnode* rt){        //析构函数
+        if(rt==nullptr) return ;
+        for(auto it:rt->sons)
+            predel(it.second);
+        rt->fa=nullptr;
+        rt->next=nullptr;
+        rt->sons.clear();
+        delete rt;
+    }
+    ~FP_Tree(){
+        predel(root);
+    }
 };
 string path,s;        //path存放路径，s存放读取的单行数据
 int col,minsup;         //col数据总行数，minsup最小支持度
