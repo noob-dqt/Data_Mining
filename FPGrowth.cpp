@@ -1,6 +1,5 @@
 #include<bits/stdc++.h>
 using namespace std;
-const int N = 1e5+5;
 struct fpnode
 {
     int item;       //项
@@ -68,15 +67,17 @@ public:
     }
 };
 string path,s;        //path存放路径，s存放读取的单行数据
-int col,minsup;         //col数据总行数，minsup最小支持度
+int row,minsup;         //row数据总行数，minsup最小支持度
 map<int,fpnode*>mp;     //建树工具
 unordered_map<int,int>cnt;
 vector<vector<int>>res;
-map<int,int>ans;
+// map<int,int>ans;
 vector<vector<int>>db;  //条件模式基
 vector<int>alpha;
 vector<int>Beta;
 vector<int>tmp;         //建树存每条事务
+int tns;
+double sur;
 bool cmp(int x,int y){
     if(cnt[x]==cnt[y]) return x<y;
     return cnt[x]>cnt[y];
@@ -100,17 +101,17 @@ FP_Tree first_construct(){
             }
         }
         if(s.back()!=' ') cnt[x]++;
-        col++;
+        row++;
     }
-    double sur;
-    cout<<"please input the minimum support(0-1):\n";
-    cin>>sur;
+    
+    // cout<<"please input the minimum support(0-1):\n";
+    // cin>>sur;
     if(sur<0||sur>1) {
         cout<<"wrong support input";
         system("pause");
         exit(-1);
     }
-    minsup=ceil(sur*col);     //计算支持度
+    minsup=ceil(sur*row);     //计算支持度
     fin.clear();
     fin.seekg(0);
     FP_Tree tree;
@@ -159,7 +160,7 @@ FP_Tree first_construct(){
     }
     return tree;
 }
-FP_Tree build(){    //利用db建树
+FP_Tree build(){    //利用条件db建树
     cnt.clear();
     mp.clear();
     for(auto &v:db)
@@ -173,7 +174,9 @@ FP_Tree build(){    //利用db建树
     for(auto &v:db){
         tmp.clear();
         p=tree.root;
-        for(int i=0;i<v.size()-1;i++) if(cnt[v[i]]>=minsup) tmp.push_back(v[i]);//最后一位是次数不能参与建树
+        for(int i=0;i<v.size()-1;i++) 
+            if(cnt[v[i]]>=minsup) 
+                tmp.push_back(v[i]);//最后一位是次数不能参与建树
         sort(tmp.begin(),tmp.end(),cmp);
         for(int x:tmp){
             if(p->sons.count(x)){   //已经存在
@@ -204,19 +207,21 @@ FP_Tree build(){    //利用db建树
 void FPgrowth(FP_Tree &tree){
     if(tree.flag){
         int len=tree.Header_Table.size();
-        for(int i=1;i<(1<<len);i++)     //二进制枚举所有组合
-        {
-            Beta=alpha;
-            for(int j=0;j<len;j++) if((1<<j)&i) Beta.push_back(tree.Header_Table[j].item);
-            res.push_back(Beta);
-            ans[Beta.size()]++;
-        }
+        tns+=(1<<len)-1;
+        // for(int i=1;i<(1<<len);i++)     //二进制枚举所有组合
+        // {
+        //     Beta=alpha;
+        //     for(int j=0;j<len;j++) if((1<<j)&i) Beta.push_back(tree.Header_Table[j].item);
+        //     res.push_back(Beta);
+        //     ans[Beta.size()]++;
+        // }
         return ;
     }
     for(auto v=tree.Header_Table.rbegin();v!=tree.Header_Table.rend();v++){
-        alpha.push_back(v->item);
-        res.push_back(alpha);
-        ans[alpha.size()]++;
+        // alpha.push_back(v->item);
+        // res.push_back(alpha);
+        // ans[alpha.size()]++;
+        tns++;
         //生成条件模式基
         fpnode*p=v->head,*q;
         db.clear();
@@ -242,26 +247,30 @@ void FPgrowth(FP_Tree &tree){
         }
         FP_Tree newtree=build();
         FPgrowth(newtree);
-        alpha.pop_back();
+        // alpha.pop_back();
     }
 }
 int main(){
+    sur=0.0005;
     path="./C++/retail.dat";
     //读数据、建树
     FP_Tree ft=first_construct();
-    //调用FP-Gowth算法进行挖掘 
+    //调用FP-Gowth算法进行挖掘
     FPgrowth(ft);
-    cout<<"total: "<<res.size()<<" items\n";
-    for(auto v:ans)  printf("%d-frequent item: %d\n",v.first,v.second);
+    cout<<tns;
+    // cout<<"total: "<<res.size()<<" items\n";
+    // for(auto v:ans){
+    //     cout<<v.first<<' '<<v.second<<endl;
+    // }
     //写入文件
-    ofstream outf("./C++/fpgrowth.txt");
-    outf<<"total: "<<res.size()<<" items\n";
-    for(auto v:ans)  outf<<v.first<<"-frequent item:"<<v.second<<'\n';
-    for(auto tp:res){
-        outf<<"{ ";
-        for(int i:tp) outf<<i<<' ';
-        outf<<"}\n";
-    }
-    outf.close();
+    // ofstream outf("./C++/fpgrowth.txt");
+    // outf<<"total: "<<res.size()<<" items\n";
+    // for(auto v:ans)  outf<<v.first<<"-frequent item:"<<v.second<<'\n';
+    // for(auto tp:res){
+    //     outf<<"{ ";
+    //     for(int i:tp) outf<<i<<' ';
+    //     outf<<"}\n";
+    // }
+    // outf.close();
     return 0;
 }
